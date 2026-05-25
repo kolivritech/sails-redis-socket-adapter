@@ -1,0 +1,22 @@
+{
+  "name": "@kolivri/sails-redis-socket-adapter",
+  "version": "1.0.0",
+  "description": "Drop-in Sails.js socket adapter using @socket.io/redis-adapter v8 + ioredis",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --forceExit"
+  },
+  "keywords": ["sails", "socket.io", "redis", "adapter"],
+  "author": "Kolivri",
+  "license": "MIT",
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "ioredis": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "peerDependencies": {
+    "socket.io": ">=4.0.0"
+  }
+}
