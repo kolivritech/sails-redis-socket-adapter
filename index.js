@@ -1,6 +1,8 @@
 const { createAdapter } = require('@socket.io/redis-adapter');
 const Redis = require('ioredis');
 
+const PREFIX = '[sails-redis-socket-adapter]';
+
 /**
  * Sails.js-compatible socket.io Redis adapter.
  *
@@ -20,6 +22,14 @@ const Redis = require('ioredis');
  *   }
  */
 module.exports = function sailsRedisAdapter(opts) {
+  console.log(`${PREFIX} Initializing with opts:`, JSON.stringify({
+    host: opts?.host,
+    port: opts?.port,
+    db: opts?.db,
+    hasPass: !!(opts?.pass || opts?.password),
+    url: opts?.url ? '(set)' : undefined,
+  }));
+
   if (typeof opts === 'string') {
     opts = { url: opts };
   }
@@ -39,12 +49,26 @@ module.exports = function sailsRedisAdapter(opts) {
   const pubClient = new Redis(redisOpts);
   const subClient = pubClient.duplicate();
 
+  pubClient.on('connect', () => {
+    console.log(`${PREFIX} pub client connected to ${redisOpts.host}:${redisOpts.port}`);
+  });
+  subClient.on('connect', () => {
+    console.log(`${PREFIX} sub client connected to ${redisOpts.host}:${redisOpts.port}`);
+  });
   pubClient.on('error', (err) => {
-    console.error('[sails-redis-socket-adapter] pub error:', err.message);
+    console.error(`${PREFIX} pub error:`, err.message);
   });
   subClient.on('error', (err) => {
-    console.error('[sails-redis-socket-adapter] sub error:', err.message);
+    console.error(`${PREFIX} sub error:`, err.message);
+  });
+  pubClient.on('close', () => {
+    console.warn(`${PREFIX} pub client disconnected`);
+  });
+  subClient.on('close', () => {
+    console.warn(`${PREFIX} sub client disconnected`);
   });
 
-  return createAdapter(pubClient, subClient);
+  const adapter = createAdapter(pubClient, subClient);
+  console.log(`${PREFIX} Adapter factory created (type: ${typeof adapter})`);
+  return adapter;
 };
